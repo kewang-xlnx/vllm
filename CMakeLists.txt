@@ -497,8 +497,11 @@ if(VLLM_GPU_LANG STREQUAL "HIP")
   set(VLLM_ROCM_EXT_SRC
     "csrc/rocm/torch_bindings.cpp"
     "csrc/rocm/attention.cu"
-    "csrc/quantization/ck_w8a8/scaled_mm_int8_entry.cu")
-
+    "csrc/rocm/scaled_mm_int8_entry.cu")
+  
+  set(CK_INCLUDE_DIR $ENV{CK_INCLUDE_DIR})
+  # set(CK_TOOLS_UTIL_INCLUDE_DIR $ENV{CK_TOOLS_UTIL_INCLUDE_DIR})
+      
   define_gpu_extension_target(
     _rocm_C
     DESTINATION vllm
@@ -506,6 +509,7 @@ if(VLLM_GPU_LANG STREQUAL "HIP")
     SOURCES ${VLLM_ROCM_EXT_SRC}
     COMPILE_FLAGS ${VLLM_GPU_FLAGS}
     ARCHITECTURES ${VLLM_GPU_ARCHES}
+    INCLUDE_DIRECTORIES ${CK_INCLUDE_DIR}
     USE_SABI 3
     WITH_SOABI)
 endif()

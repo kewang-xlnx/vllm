@@ -29,6 +29,12 @@ TORCH_LIBRARY_EXPAND(TORCH_EXTENSION_NAME, rocm_ops) {
       "                str kv_cache_dtype,"
       "                float k_scale, float v_scale) -> ()");
   rocm_ops.impl("paged_attention", torch::kCUDA, &paged_attention);
+
+  // CK int8 GEMM, supporting symmetric per-tensor
+  rocm_ops.def(
+      "int8_tensorwise_gemm(Tensor XQ,"
+      "                     Tensor WQ, float scale) -> Tensor");
+  rocm_ops.impl("int8_tensorwise_gemm", torch::kCUDA, &int8_tensorwise_gemm);
 }
 
 REGISTER_EXTENSION(TORCH_EXTENSION_NAME)

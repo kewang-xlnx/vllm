@@ -12,3 +12,6 @@ void paged_attention(torch::Tensor& out, torch::Tensor& exp_sums,
                      const c10::optional<torch::Tensor>& alibi_slopes,
                      const std::string& kv_cache_dtype, double k_scale,
                      double v_scale);
+
+at::Tensor int8_tensorwise_gemm(torch::Tensor XQ, 
+                                torch::Tensor WQ, double scale);

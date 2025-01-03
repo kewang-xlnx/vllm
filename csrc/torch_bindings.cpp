@@ -379,13 +379,13 @@ TORCH_LIBRARY_EXPAND(TORCH_EXTENSION_NAME, ops) {
   ops.impl("causal_conv1d_fwd", torch::kCUDA, &causal_conv1d_fwd);
 #endif
 
-#ifndef USE_ROCM
-  // CK int8 GEMM, supporting symmetric per-tensor
-  ops.def(
-      "int8_tensorwise_gemm(Tensor! Y, Tensor XQ,"
-      "                     Tensor WQ, float scale) -> ()");
-  ops.impl("int8_tensorwise_gemm", torch::kCUDA, &int8_tensorwise_gemm);
-#endif
+// #ifdef USE_ROCM
+//   // CK int8 GEMM, supporting symmetric per-tensor
+//   ops.def(
+//       "int8_tensorwise_gemm(Tensor! Y, Tensor XQ,"
+//       "                     Tensor WQ, float scale) -> ()");
+//   ops.impl("int8_tensorwise_gemm", torch::kCUDA, &int8_tensorwise_gemm);
+// #endif
 
   // Quantized GEMM for GPTQ.
   // Note: even though the C++ inferred schema is correct for this op, it seems

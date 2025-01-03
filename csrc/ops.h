@@ -175,10 +175,10 @@ bool cutlass_sparse_compress_entry(torch::Tensor& a_compressed,
                                    torch::Tensor& e, torch::Tensor const& a);
 #endif
 
-#ifdef USE_ROCM
-void int8_tensorwise_gemm(torch::Tensor& Y, torch::Tensor XQ, 
-                          torch::Tensor WQ, float scale);
-#endif
+// #ifdef USE_ROCM
+// void int8_tensorwise_gemm(torch::Tensor& Y, torch::Tensor XQ, 
+//                           torch::Tensor WQ, float scale);
+// #endif
 
 void static_scaled_int8_quant(torch::Tensor& out, torch::Tensor const& input,
                               torch::Tensor const& scale,
