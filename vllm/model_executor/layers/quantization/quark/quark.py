@@ -196,6 +196,31 @@ class QuarkConfig(QuantizationConfig):
         # Both symmetric and asymmetric input quantization supported.
         # Only symmetric weight quantization supported.
         return is_int8_dtype and is_tensor and is_weight_symmetric and is_static
+    
+    def _is_wfp4afpN_group(self, weight_config: Optional[Dict[str, Any]],
+                           input_config: Optional[Dict[str, Any]]) -> bool:
+        # Confirm weights quantized
+        if weight_config is None:
+            return False
+        
+        # Confirm weight scheme is supported
+        is_fp4_weight = (weight_config.get("dtype") == "fp4")
+        is_static_weight = not weight_config.get("is_dynamic")
+        is_per_group_weight = (weight_config.get("qscheme") == "per_group")
+        
+        if not (is_fp4_weight and is_static_weight and is_per_group_weight):
+            return False
+        
+        # weight only quantization is always supported
+        if input_config is None:
+            return True
+        
+        # Confirm input quantization is supported
+        is_per_group_input = (input_config.get("qscheme") == "per_group")
+        is_dynamic_input = input_config.get("is_dynamic")
+        is_fpN_input = (input_config.get("dtype") in ["fp4", "fp6", "fp8e4m3"])
+        
+        return is_per_group_input and is_dynamic_input and is_fpN_input
 
     def _find_matched_config(self, layer_name: str,
                              module: torch.nn.Module) -> Dict[str, Any]:
@@ -261,6 +286,33 @@ class QuarkConfig(QuantizationConfig):
             return QuarkW8A8Int8(qscheme=weight_qscheme,
                                  is_static_input_scheme=True,
                                  input_symmetric=input_config.get("symmetric"))
+        elif self._is_wfp4afpN_group(weight_config, input_config):
+            weight_qscheme = cast(str, weight_config.get("qscheme"))
+            weight_mx_scale_constraint = weight_config.get("is_mx_scale_constraint")
+            weight_group_size = weight_config.get("group_size")
+            weight_axis = weight_config.get("ch_axis")
+            if input_config is not None:
+                input_qscheme = cast(str, input_config.get("qscheme"))
+                input_mx_scale_constraint = input_config.get("is_mx_scale_constraint")
+                input_group_size = input_config.get("group_size")
+                input_dtype = cast(str, input_config.get("dtype"))
+                input_axis = input_config.get("ch_axis")
+            else:
+                input_qscheme = None
+                input_mx_scale_constraint = None
+                input_group_size = None
+                input_dtype = None
+                input_axis = None
+            
+            return QuarkWfp4aFpNGroup(weight_qscheme=weight_qscheme,
+                                      weight_mx_scale_constraint=weight_mx_scale_constraint,
+                                      weight_group_size=weight_group_size,
+                                      weight_axis=weight_axis,
+                                      input_qscheme=input_qscheme,
+                                      input_mx_scale_constraint=input_mx_scale_constraint,
+                                      input_group_size=input_group_size,
+                                      input_axis=input_axis,
+                                      input_dtype=input_dtype)
 
         raise NotImplementedError("No quark compatible scheme was found. "
                                   f"Weight config: {weight_config}, "
