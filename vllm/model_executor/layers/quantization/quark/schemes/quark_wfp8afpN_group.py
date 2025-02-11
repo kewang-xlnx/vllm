@@ -33,6 +33,11 @@ class QuarkWfp4aFpNGroup(QuarkScheme):
         self.input_group_size = input_group_size
         self.input_axis = input_axis
         self.input_dtype = input_dtype
+        
+    @classmethod
+    def get_min_capability(cls) -> int:
+        # lovelace and up
+        return 89
 
     def process_weights_after_loading(self, layer) -> None:
         layer.weight = Parameter(layer.weight.data, requires_grad=False)
@@ -60,7 +65,7 @@ class QuarkWfp4aFpNGroup(QuarkScheme):
         num_groups = input_size_per_partition // self.weight_group_size
         # WEIGHT SCALE
         weight_scale = GroupQuantScaleParameter(data=torch.empty(
-            output_partition_sizes,
+            output_size_per_partition,
             num_groups,
             dtype=params_dtype),
                                                 input_dim=1,

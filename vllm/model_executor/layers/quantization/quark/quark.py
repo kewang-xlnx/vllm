@@ -15,7 +15,7 @@ from vllm.model_executor.layers.quantization.kv_cache import BaseKVCacheMethod
 from vllm.model_executor.layers.quantization.quark.quark_moe import (  # noqa: E501
     QuarkMoEMethod)
 from vllm.model_executor.layers.quantization.quark.schemes import (
-    QuarkScheme, QuarkW8A8Fp8, QuarkW8A8Int8)
+    QuarkScheme, QuarkW8A8Fp8, QuarkW8A8Int8, QuarkWfp4aFpNGroup)
 from vllm.model_executor.layers.quantization.quark.utils import (
     deep_compare, should_ignore_layer)
 from vllm.platforms import current_platform
@@ -218,7 +218,7 @@ class QuarkConfig(QuantizationConfig):
         # Confirm input quantization is supported
         is_per_group_input = (input_config.get("qscheme") == "per_group")
         is_dynamic_input = input_config.get("is_dynamic")
-        is_fpN_input = (input_config.get("dtype") in ["fp4", "fp6", "fp8e4m3"])
+        is_fpN_input = (input_config.get("dtype") in ["fp4", "fp6", "fp8_e4m3"])
         
         return is_per_group_input and is_dynamic_input and is_fpN_input
 
